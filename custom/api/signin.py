@@ -10,7 +10,6 @@ from rest_framework.permissions import AllowAny
 @permission_classes((AllowAny,))
 def api_signin(request):
     try:
-        print()
         username = request.data['username']
         password = request.data['password']
     except:
@@ -25,5 +24,27 @@ def api_signin(request):
     else:
         return Response(
             {'authenticated': False, 'token': None}, 
+            status=HTTP_401_UNAUTHORIZED
+        )
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny,))
+def api_logout(request):
+    try:
+        username = request.data['username']
+        password = request.data['password']
+    except:
+        return Response(
+            {'error': 'Please provide correct username and password'},
+            status=HTTP_400_BAD_REQUEST
+        )
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        Token.objects.filter(user=user).delete()
+        return Response({'logout': True})
+    else:
+        return Response(
+            {'logout': False, 'token': None},
             status=HTTP_401_UNAUTHORIZED
         )
